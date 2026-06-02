@@ -22,6 +22,5 @@ runs:
       env:
         INPUT_GENERATE_ZIP: ${{ inputs.generate-zip }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
-        ACTION_PATH: ${{ github.action_path }}
-      run: "$ACTION_PATH/deploy.sh"
+      run: ${{ github.action_path }}/deploy.sh
       shell: bash

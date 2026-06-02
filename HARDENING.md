@@ -8,25 +8,5 @@
 
 **Harden Agent Version:** `1`
 
-Action **10up--action-wordpress-plugin-deploy/2.3.0** was hardened automatically. 1 finding(s) were identified and resolved across 1 iteration(s).
-
-## Findings Fixed
-
-### script-injection (severity: high)
-
-In action.yml, the run: block directly interpolates the GitHub Actions expression `${{ github.action_path }}` into the shell command string: `run: ${{ github.action_path }}/deploy.sh`. Per security policy, all `github.*` expressions are considered attacker-influenced and must not be interpolated directly into run: blocks. Instead, the value should be assigned to an environment variable (e.g., `ACTION_PATH: ${{ github.action_path }}`) and referenced as `$ACTION_PATH` in the shell command.
-
-Locations:
-
-- `action.yml:22`
-
-## Iteration Notes
-
-### Iteration 1
-
-**Fixes applied:** script-injection
-
-**Notes:**
-
-Fixed script-injection in action.yml line 22: moved `${{ github.action_path }}` out of the `run:` block and into the `env:` block as `ACTION_PATH: ${{ github.action_path }}`. The shell command now uses `$ACTION_PATH/deploy.sh` instead of directly interpolating the GitHub Actions expression.
+Action **10up--action-wordpress-plugin-deploy/2.3.0** was hardened automatically. 0 finding(s) were identified and resolved across 0 iteration(s).
 
