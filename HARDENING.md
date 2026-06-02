@@ -14,11 +14,11 @@ Action **10up--action-wordpress-plugin-deploy/2.1.1** was hardened automatically
 
 ### script-injection (severity: high)
 
-In action.yml, the `run:` block directly interpolates the GitHub Actions expression `${{ github.action_path }}` into the shell command string (line 20: `run: ${{ github.action_path }}/deploy.sh`). Although `github.action_path` is set by GitHub's infrastructure and is not directly user-supplied, it is still a `github.*` context value interpolated inline into a `run:` block rather than being passed through an environment variable. The safe pattern is to assign it to an env var first (e.g., `ACTION_PATH: ${{ github.action_path }}`) and then reference `$ACTION_PATH/deploy.sh` in the run block.
+In action.yml, the `run:` field directly interpolates the GitHub Actions expression `${{ github.action_path }}` into the shell command string (`run: ${{ github.action_path }}/deploy.sh`). Per security best practice, GitHub context expressions must not be interpolated directly into `run:` blocks; they should be assigned to an environment variable via `env:` and referenced as `$ENV_VAR` in the shell command instead. Although `github.action_path` is typically system-controlled, this pattern is still a violation of the script-injection check.
 
 Locations:
 
-- `action.yml:20`
+- `action.yml:21`
 
 ## Iteration Notes
 
@@ -28,5 +28,5 @@ Locations:
 
 **Notes:**
 
-Fixed script-injection in action.yml line 20: moved `${{ github.action_path }}` out of the `run:` block into the step's `env:` block as `ACTION_PATH: ${{ github.action_path }}`, then updated the run command to reference `$ACTION_PATH/deploy.sh` instead of the inline expression.
+Fixed script injection in action.yml line 21: moved `${{ github.action_path }}` out of the `run:` field and into the `env:` block as `ACTION_PATH: ${{ github.action_path }}`. The shell command now uses `"$ACTION_PATH/deploy.sh"` instead of `${{ github.action_path }}/deploy.sh`.
 
