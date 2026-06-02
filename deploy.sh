@@ -75,7 +75,10 @@ generate_zip() {
     zip -r "${GITHUB_WORKSPACE}/${SLUG}.zip" "$SLUG"
     unlink "${SVN_DIR}/${SLUG}"
 
-    echo "zip-path=${GITHUB_WORKSPACE}/${SLUG}.zip" >> "${GITHUB_OUTPUT}"
+    # Sanitize SLUG (derived from GITHUB_REPOSITORY) before writing to GITHUB_OUTPUT
+    # to prevent newline injection attacks.
+    safe_slug=$(printf '%s' "${SLUG}" | tr -d '\n\r')
+    echo "zip-path=${GITHUB_WORKSPACE}/${safe_slug}.zip" >> "${GITHUB_OUTPUT}"
     echo "✓ Zip file generated!"
   fi
 }

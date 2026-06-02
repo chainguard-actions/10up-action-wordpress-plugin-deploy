@@ -8,17 +8,17 @@
 
 **Harden Agent Version:** `1`
 
-Action **10up--action-wordpress-plugin-deploy/2.2.2** was hardened automatically. 1 finding(s) were identified and resolved across 1 iteration(s).
+Action **10up--action-wordpress-plugin-deploy/2.2.2** was hardened automatically. 1 finding(s) were identified and resolved across 2 iteration(s).
 
 ## Findings Fixed
 
 ### script-injection (severity: high)
 
-In action.yml, the run: field directly interpolates the GitHub Actions expression `${{ github.action_path }}` inside the shell command string: `run: ${{ github.action_path }}/deploy.sh`. Per the check rules, all `github.*` expressions interpolated directly into a `run:` block are flagged as script injection. The safe pattern is to assign the value to an environment variable first (e.g., `ACTION_PATH: ${{ github.action_path }}`) and then reference `$ACTION_PATH` in the run block.
+The `run:` block in action.yml directly interpolates the GitHub Actions expression `${{ github.action_path }}` into the shell command string (`run: ${{ github.action_path }}/deploy.sh`). Per the check rules, `github.*` expressions must be assigned to an `env:` variable first and then referenced as `$ENV_VAR` in the run step. While `github.action_path` is typically a trusted path, it is still a `github.*` context value interpolated directly into the shell command rather than being safely passed through an environment variable.
 
 Locations:
 
-- `action.yml:23`
+- `action.yml:22`
 
 ## Iteration Notes
 
@@ -28,5 +28,13 @@ Locations:
 
 **Notes:**
 
-Fixed script injection in action.yml line 23: moved `${{ github.action_path }}` out of the `run:` shell command and into the `env:` block as `ACTION_PATH: ${{ github.action_path }}`. The run command now uses `$ACTION_PATH/deploy.sh` instead of `${{ github.action_path }}/deploy.sh`.
+Fixed script-injection in action.yml line 22: moved `${{ github.action_path }}` out of the `run:` shell string and into the step's `env:` block as `ACTION_PATH: ${{ github.action_path }}`. The run command now uses `"$ACTION_PATH/deploy.sh"` instead of `${{ github.action_path }}/deploy.sh`, ensuring the GitHub context expression is not directly interpolated into the shell command string.
+
+### Iteration 2
+
+**Fixes applied:** github-env-injection
+
+**Notes:**
+
+Fixed the github-env-injection vulnerability in deploy.sh at line 65 (generate_zip function). The SLUG variable, derived from GITHUB_REPOSITORY (attacker-controllable), was being written directly to $GITHUB_OUTPUT without sanitization. Added a sanitization step using `safe_slug=$(printf '%s' "${SLUG}" | tr -d '\n\r')` and replaced the direct use of `${SLUG}` with `${safe_slug}` in the echo statement that writes to $GITHUB_OUTPUT. This prevents newline injection attacks where a malicious repository name could inject arbitrary key-value pairs into the GitHub output environment.
 
