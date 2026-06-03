@@ -181,7 +181,8 @@ if $INPUT_GENERATE_ZIP; then
   zip -r "${GITHUB_WORKSPACE}/${SLUG}.zip" "$SLUG"
   unlink "${SVN_DIR}/${SLUG}"
 
-  echo "zip-path=${GITHUB_WORKSPACE}/${SLUG}.zip" >> "${GITHUB_OUTPUT}"
+  safe_slug=$(printf '%s' "$SLUG" | tr -d '\n\r')
+  echo "zip-path=${GITHUB_WORKSPACE}/${safe_slug}.zip" >> "${GITHUB_OUTPUT}"
   echo "✓ Zip file generated!"
 fi
 
