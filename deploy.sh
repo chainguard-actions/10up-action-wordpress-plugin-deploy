@@ -20,6 +20,19 @@ if [[ -z "$SVN_PASSWORD" ]]; then
 	exit 1
 fi
 
+# Sanitize boolean inputs to prevent shell injection via metacharacters.
+# Accept only literal "true"; treat everything else as false.
+if [[ "$INPUT_DRY_RUN" == "true" ]]; then
+  INPUT_DRY_RUN=true
+else
+  INPUT_DRY_RUN=false
+fi
+if [[ "$INPUT_GENERATE_ZIP" == "true" ]]; then
+  INPUT_GENERATE_ZIP=true
+else
+  INPUT_GENERATE_ZIP=false
+fi
+
 if $INPUT_DRY_RUN; then
 	echo "ℹ︎ Dry run: No files will be committed to Subversion."
 fi
