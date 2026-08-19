@@ -39,5 +39,5 @@ runs:
       env:
         INPUT_GENERATE_ZIP: ${{ inputs.generate-zip }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
-      run: $GITHUB_ACTION_PATH/deploy.sh
+      run: "$GITHUB_ACTION_PATH/deploy.sh"
       shell: bash
