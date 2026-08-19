@@ -20,20 +20,7 @@ if [[ -z "$SVN_PASSWORD" ]]; then
 	exit 1
 fi
 
-# Sanitize boolean inputs to prevent shell injection via metacharacters.
-# Accept only literal "true"; treat everything else as false.
-if [[ "$INPUT_DRY_RUN" == "true" ]]; then
-  INPUT_DRY_RUN=true
-else
-  INPUT_DRY_RUN=false
-fi
-if [[ "$INPUT_GENERATE_ZIP" == "true" ]]; then
-  INPUT_GENERATE_ZIP=true
-else
-  INPUT_GENERATE_ZIP=false
-fi
-
-if $INPUT_DRY_RUN; then
+if [[ "$INPUT_DRY_RUN" == 'true' ]]; then
 	echo "ℹ︎ Dry run: No files will be committed to Subversion."
 fi
 
@@ -179,14 +166,14 @@ svn update
 
 svn status
 
-if $INPUT_DRY_RUN; then
+if [[ "$INPUT_DRY_RUN" == 'true' ]]; then
   echo "➤ Dry run: Files not committed."
 else
   echo "➤ Committing files..."
   svn commit -m "Update to version $VERSION from GitHub" --no-auth-cache --non-interactive  --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
 fi
 
-if $INPUT_GENERATE_ZIP; then
+if [[ "$INPUT_GENERATE_ZIP" == 'true' ]]; then
   echo "Generating zip file..."
 
   # use a symbolic link so the directory in the zip matches the slug
@@ -194,8 +181,8 @@ if $INPUT_GENERATE_ZIP; then
   zip -r "${GITHUB_WORKSPACE}/${SLUG}.zip" "$SLUG"
   unlink "${SVN_DIR}/${SLUG}"
 
-  safe_slug=$(printf '%s' "$SLUG" | tr -d '\n\r')
-  echo "zip-path=${GITHUB_WORKSPACE}/${safe_slug}.zip" >> "${GITHUB_OUTPUT}"
+  SAFE_SLUG=$(printf '%s' "$SLUG" | tr -d '\n\r')
+  echo "zip-path=${GITHUB_WORKSPACE}/${SAFE_SLUG}.zip" >> "${GITHUB_OUTPUT}"
   echo "✓ Zip file generated!"
 fi
 
