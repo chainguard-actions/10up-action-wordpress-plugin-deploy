@@ -1,0 +1,29 @@
+name: Release Pull Request Automation
+
+on:
+  create:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  release-pull-request-automation:
+    if: ${{ github.event.ref_type == 'branch' && contains( github.ref, 'release/' ) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3
+      - name: Generate title
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          echo "$BRANCH"
+          VERSION=${BRANCH#'release/'}
+          safe_version=$(printf '%s' "$VERSION" | tr -d '\n\r')
+          echo "result=Release: ${safe_version}" >> "${GITHUB_OUTPUT}"
+        id: title
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TITLE: ${{ steps.title.outputs.result }}
+        run: gh pr create --title "$PR_TITLE" --body-file ./.github/release-pull-request-template.md
