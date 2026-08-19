@@ -75,8 +75,8 @@ generate_zip() {
     zip -r "${GITHUB_WORKSPACE}/${SLUG}.zip" "$SLUG"
     unlink "${SVN_DIR}/${SLUG}"
 
-    safe_zip_path=$(printf '%s' "${GITHUB_WORKSPACE}/${SLUG}.zip" | tr -d '\n\r')
-    echo "zip-path=${safe_zip_path}" >> "${GITHUB_OUTPUT}"
+    safe_slug=$(printf '%s' "$SLUG" | tr -d '\n\r')
+    echo "zip-path=${GITHUB_WORKSPACE}/${safe_slug}.zip" >> "${GITHUB_OUTPUT}"
     echo "✓ Zip file generated!"
   fi
 }

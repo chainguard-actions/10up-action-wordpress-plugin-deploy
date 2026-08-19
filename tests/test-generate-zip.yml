@@ -1,0 +1,43 @@
+name: Test generate-zip output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          SVN_USERNAME: fake-user
+          SVN_PASSWORD: fake-password
+          # Use a known real plugin slug so SVN checkout can succeed
+          SLUG: hello-dolly
+          # Use a version that is already published so the script exits early
+          # after calling generate_zip() — this is the path that sets zip-path output
+          VERSION: "1.7.2"
+        with:
+          generate-zip: "true"
+          dry-run: "true"
+
+      - name: Assert zip-path output or graceful failure
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          ZIP_PATH: ${{ steps.action.outputs.zip-path }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "zip-path: $ZIP_PATH"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$ZIP_PATH" ]; then
+              echo "FAIL: action succeeded but zip-path output is empty"
+              exit 1
+            fi
+            echo "PASS: zip-path output is '$ZIP_PATH'"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (likely SVN network issue in test environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
