@@ -20,7 +20,7 @@ if [[ -z "$SVN_PASSWORD" ]]; then
 	exit 1
 fi
 
-if "$INPUT_DRY_RUN"; then
+if [[ "$INPUT_DRY_RUN" == "true" ]]; then
 	echo "ℹ︎ Dry run: No files will be committed to Subversion."
 fi
 
@@ -67,7 +67,7 @@ svn update --set-depth infinity trunk
 svn update --set-depth immediates tags
 
 generate_zip() {
-  if "$INPUT_GENERATE_ZIP"; then
+  if [[ "$INPUT_GENERATE_ZIP" == "true" ]]; then
     echo "Generating zip file..."
 
     # use a symbolic link so the directory in the zip matches the slug
@@ -75,9 +75,9 @@ generate_zip() {
     zip -r "${GITHUB_WORKSPACE}/${SLUG}.zip" "$SLUG"
     unlink "${SVN_DIR}/${SLUG}"
 
-    safe_slug=$(printf '%s' "$SLUG" | tr -d '\n\r')
-    safe_workspace=$(printf '%s' "$GITHUB_WORKSPACE" | tr -d '\n\r')
-    echo "zip-path=${safe_workspace}/${safe_slug}.zip" >> "${GITHUB_OUTPUT}"
+    zip_path="${GITHUB_WORKSPACE}/${SLUG}.zip"
+    safe_zip_path=$(printf '%s' "$zip_path" | tr -d '\n\r')
+    echo "zip-path=${safe_zip_path}" >> "${GITHUB_OUTPUT}"
     echo "✓ Zip file generated!"
   fi
 }
@@ -188,9 +188,11 @@ fi
 #Resolves => SVN commit failed: Directory out of date
 svn update
 
-svn statusif "$INPUT_DRY_RUN"; then
+svn status
+
+if [[ "$INPUT_DRY_RUN" == "true" ]]; then
   echo "➤ Dry run: Files not committed."
-elsese
+else
   echo "➤ Committing files..."
   svn commit -m "Update to version $VERSION from GitHub" --no-auth-cache --non-interactive  --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
 fi
