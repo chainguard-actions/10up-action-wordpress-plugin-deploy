@@ -217,7 +217,7 @@ svn update
 
 svn status
 
-if [[ "$INPUT_DRY_RUN" == 'true' ]]; then
+if $INPUT_DRY_RUN; then
   echo "➤ Dry run: Files not committed."
 else
   echo "➤ Committing files..."
